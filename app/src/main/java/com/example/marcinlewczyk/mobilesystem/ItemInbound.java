@@ -25,7 +25,7 @@ public class ItemInbound extends AppCompatActivity {
     String currentLocation;
     SurfaceView cameraPreview;
     TextView itemIdAndFromTxt, manufacturerTxt, itemQtyTxt;
-    Button commitButton, readCodeButton;
+    Button commitInboundButton, readCodeInboundButton;
     BarcodeDetector barcodeDetector;
     CameraSource cameraSource;
     final int RequestCameraPermissionID = 1001;
@@ -45,9 +45,9 @@ public class ItemInbound extends AppCompatActivity {
         itemIdAndFromTxt = findViewById(R.id.itemIdAndFrom);
         manufacturerTxt = findViewById(R.id.manufacturer);
         itemQtyTxt = findViewById(R.id.itemQty);
-        commitButton = findViewById(R.id.commitButton);
-        readCodeButton = findViewById(R.id.readCodeButton);
-        commitButton.setEnabled(false);
+        commitInboundButton = findViewById(R.id.commitButton);
+        readCodeInboundButton = findViewById(R.id.readCodeButton);
+        commitInboundButton.setEnabled(false);
     }
 
     private void setTitleBarContent(){
@@ -68,7 +68,7 @@ public class ItemInbound extends AppCompatActivity {
     }
 
     private void bindReadButtonWithScanning() {
-        readCodeButton.setOnClickListener(new View.OnClickListener() {
+        readCodeInboundButton.setOnClickListener(new View.OnClickListener() {
             int howMuchScannedData = 0;
             @Override
             public void onClick(View v) {
@@ -93,7 +93,7 @@ public class ItemInbound extends AppCompatActivity {
                     }
                 });
                 if(howMuchScannedData != 0){
-                    commitButton.setEnabled(true);
+                    commitInboundButton.setEnabled(true);
                 }
             }
         });
@@ -131,7 +131,6 @@ public class ItemInbound extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
 
             @Override
@@ -167,10 +166,10 @@ public class ItemInbound extends AppCompatActivity {
     }
 
     private void connectCommitButtonLogic(){
-        commitButton.setOnClickListener(new View.OnClickListener() {
+        commitInboundButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                //todo communication with server
             }
         });
     }

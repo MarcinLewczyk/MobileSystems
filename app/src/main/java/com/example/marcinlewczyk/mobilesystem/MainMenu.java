@@ -20,7 +20,7 @@ public class MainMenu extends Activity {
         setContentView(R.layout.activity_main_menu);
         bindControls();
         setListeners();
-
+        getLocation();
     }
 
     private void bindControls() {
@@ -65,5 +65,11 @@ public class MainMenu extends Activity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void getLocation(){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String name = preferences.getString("location", "");
+        currentLocation.setText(name);
     }
 }
