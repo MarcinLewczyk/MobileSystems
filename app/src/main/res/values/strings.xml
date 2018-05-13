@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MobileSystem</string>
+    <string name="camera_focus_text">Please focus camera on QR code</string>
+    <string name="commit_transaction">Commit transaction</string>
+    <string name="capture_code">Capture code</string>
+    <string name="location_edit_text">Enter your location\'s code</string>
+</resources>

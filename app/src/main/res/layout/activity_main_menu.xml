@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainMenu">
+
+    <EditText
+        android:id="@+id/locationEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:layout_centerHorizontal="true"
+        android:hint="@string/location_edit_text"/>
+
+    <Button
+        android:id="@+id/setLocationButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/locationEditText"
+        android:textSize="20dp"
+        android:text="Set location"/>
+
+    <Button
+        android:id="@+id/inboundAct"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/setLocationButton"
+        android:layout_marginTop="20dp"
+        android:text="Item Inbound"
+        android:textSize="20dp"
+        />
+
+    <Button
+        android:id="@+id/outboundAct"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/inboundAct"
+        android:text="Item outbound"
+        android:textSize="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/cycleCountAct"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/outboundAct"
+        android:text="Cycle count"
+        android:textSize="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
