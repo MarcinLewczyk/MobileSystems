@@ -39,7 +39,7 @@ public class MainMenu extends Activity {
                 SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("location", currentLocation.getText().toString());
-                editor.apply(); // editor.commit();
+                editor.apply();
                 Toast.makeText(MainMenu.this, "Location set!",
                         Toast.LENGTH_LONG).show();
             }
