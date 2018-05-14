@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class MainMenu extends Activity {
     EditText currentLocation;
@@ -38,7 +39,9 @@ public class MainMenu extends Activity {
                 SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("location", currentLocation.getText().toString());
-                editor.commit();
+                editor.apply(); // editor.commit();
+                Toast.makeText(MainMenu.this, "Location set!",
+                        Toast.LENGTH_LONG).show();
             }
         });
 
