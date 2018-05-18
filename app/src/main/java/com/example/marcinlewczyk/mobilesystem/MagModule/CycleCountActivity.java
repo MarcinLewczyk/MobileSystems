@@ -1,10 +1,11 @@
-package com.example.marcinlewczyk.mobilesystem;
+package com.example.marcinlewczyk.mobilesystem.MagModule;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 
 import com.example.marcinlewczyk.mobilesystem.Config.WebServiceConfig;
 import com.example.marcinlewczyk.mobilesystem.POJO.ItemInboundInfo;
+import com.example.marcinlewczyk.mobilesystem.R;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -35,49 +37,57 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class ItemInbound extends AppCompatActivity {
+public class CycleCountActivity extends AppCompatActivity {
     private String currentLocation;
     private SurfaceView cameraPreview;
-    private TextView itemIdTxt, fromTxt, itemQtyTxt;
-    private Button commitInboundButton, readCodeInboundButton;
+    private TextView itemIdTxt, itemQtyTxt, itemQtyTotalScanned;
+    private Button commitCycleCountButton, readCodeCycleCountButton;
     private BarcodeDetector barcodeDetector;
     private CameraSource cameraSource;
+    private long lastScan, timeParameter = 2000, itemId, lastItemId;
     private final int RequestCameraPermissionID = 1001;
-    private long itemId, locationId;
-    private int itemQty;
+    private int lastScannedQty, totalScannedQty;
+    private boolean firstScan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_item_inbound);
+        setContentView(R.layout.activity_cycle_count);
+        initVariables();
         prepareGUI();
         buildQRScanner();
         connectCommitButtonLogic();
     }
 
-    private void prepareGUI(){
+    private void initVariables() {
+        totalScannedQty = 0;
+        firstScan = true;
+    }
+
+    private void prepareGUI() {
         initControls();
         setTitleBarContent();
     }
 
     private void initControls() {
         cameraPreview = findViewById(R.id.cameraPreview);
-        itemIdTxt = findViewById(R.id.itemIdAndFrom);
-        fromTxt = findViewById(R.id.manufacturer);
+        itemIdTxt = findViewById(R.id.itemId);
         itemQtyTxt = findViewById(R.id.itemQty);
-        commitInboundButton = findViewById(R.id.commitButton);
-        readCodeInboundButton = findViewById(R.id.readCodeButton);
-        commitInboundButton.setEnabled(false);
+        itemQtyTotalScanned = findViewById(R.id.itemQtyTotal);
+        commitCycleCountButton = findViewById(R.id.commitButton);
+        readCodeCycleCountButton = findViewById(R.id.readCodeButton);
+        commitCycleCountButton.setEnabled(false);
     }
 
     private void setTitleBarContent(){
         getCurrentLocation();
-        setTitle("Item Inbound - your location: " + currentLocation);
+        setTitle("Cycle count - your location: " + currentLocation);
     }
 
     private void getCurrentLocation(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        currentLocation = preferences.getString("location", "Nope");
+        String name = preferences.getString("location", "Nope");
+        currentLocation = name;
     }
 
     private void buildQRScanner() {
@@ -110,7 +120,7 @@ public class ItemInbound extends AppCompatActivity {
             public void surfaceCreated(SurfaceHolder holder) {
 
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(ItemInbound.this, new String[]{android.Manifest.permission.CAMERA}, RequestCameraPermissionID);
+                    ActivityCompat.requestPermissions(CycleCountActivity.this, new String[]{android.Manifest.permission.CAMERA}, RequestCameraPermissionID);
                     return;
                 }
                 try {
@@ -133,7 +143,7 @@ public class ItemInbound extends AppCompatActivity {
     }
 
     private void bindReadButtonWithScanning() {
-        readCodeInboundButton.setOnClickListener(new View.OnClickListener() {
+        readCodeCycleCountButton.setOnClickListener(new View.OnClickListener() {
             int howMuchScannedData = 0;
             @Override
             public void onClick(View v) {
@@ -150,20 +160,113 @@ public class ItemInbound extends AppCompatActivity {
                         if(qrCodes.size() != 0){
                             String qrCodeString = qrCodes.valueAt(0).displayValue;
                             String[] results = qrCodeString.split(";");
-                            itemId = Long.valueOf(results[0]);
-                            locationId = Long.valueOf(results[1]);
-                            itemQty = Integer.valueOf(results[2]);
-                            howMuchScannedData = results.length;
+                            long currentTime = SystemClock.uptimeMillis();
+                            if(currentTime - lastScan >= timeParameter){
+                                itemId = Long.valueOf(results[0]);
+                                lastScannedQty = Integer.valueOf(results[2]);
+                                howMuchScannedData = results.length;
+                                lastScan = currentTime;
+                            }
                         }
                     }
                 });
-                if(howMuchScannedData == 3){ //change if needed
-                    updateGUI("" + itemId, "" + locationId, "" + itemQty);
-                    callItemInfoWebService();
-                    commitInboundButton.setEnabled(true);
+                if(howMuchScannedData == 3){
+                    if(firstScan){
+                        totalScannedQty += lastScannedQty;
+                        updateGUI("" + itemId, "" + lastScannedQty, "" + totalScannedQty);
+                        callItemInfoWebService();
+                        commitCycleCountButton.setEnabled(true);
+                        lastItemId = itemId;
+                        firstScan = false;
+                    } else if (lastItemId == itemId) {
+                        totalScannedQty += lastScannedQty;
+                        updateGUI("", "" + lastScannedQty, "" + totalScannedQty);
+                    } else {
+                        new AlertDialog.Builder(CycleCountActivity.this)
+                                .setTitle("Error")
+                                .setMessage("This item is different than previous one, cannot count different items at once")
+                                .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                }).setCancelable(false)
+                                .show();
+                    }
                 }
             }
         });
+    }
+
+    private void callItemInfoWebService(){
+        new ItemInfoWebServiceHandler().execute(WebServiceConfig.address + "/item/" + itemId);
+    }
+
+    private class ItemInfoWebServiceHandler extends AsyncTask<String, Void, String> {
+
+        private ProgressDialog dialog = new ProgressDialog(CycleCountActivity.this);
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Connecting with server...");
+            dialog.show();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+            try {
+                URL url = new URL(urls[0]);
+                URLConnection connection = url.openConnection();
+                connection.setReadTimeout(10000);
+                connection.setConnectTimeout(10000);
+                InputStream in = new BufferedInputStream(connection.getInputStream());
+                return convertInputStreamToString(in);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            dialog.dismiss();
+            try {
+                JSONObject object = new JSONObject(result);
+                ItemInboundInfo itemInboundInfo = new ItemInboundInfo();
+                itemInboundInfo.setId(object.optLong("id"));
+                itemInboundInfo.setName(object.optString("name"));
+                itemInboundInfo.setLocationId(object.optLong("locationId"));
+                itemInboundInfo.setDescription(object.optString("description"));
+                itemInboundInfo.setLocationName(object.optString("locationName"));
+                itemInboundInfo.setQuantity(object.optInt("quantity"));
+                updateGUI(itemInboundInfo.getId() + "  Name: " + itemInboundInfo.getName(),
+                        lastScannedQty + "",
+                        totalScannedQty + "");
+            } catch (Exception e) {
+                new AlertDialog.Builder(CycleCountActivity.this)
+                        .setTitle("Error")
+                        .setMessage("Check Internet connection")
+                        .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                callItemInfoWebService();
+                            }
+                        }).setCancelable(false).setNegativeButton("Back", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                }).show();
+            }
+        }
+    }
+
+    private void updateGUI(String itemInfo, String scannedQty, String totalScannedQty) {
+        if(itemInfo != ""){
+            itemIdTxt.setText("Item: " + itemInfo);
+        }
+        itemQtyTotalScanned.setText("Last scanned qty: " + scannedQty);
+        itemQtyTxt.setText("Total scanned: " + totalScannedQty);
     }
 
     @Override
@@ -186,93 +289,22 @@ public class ItemInbound extends AppCompatActivity {
         }
     }
 
-    private void callItemInfoWebService(){
-        new ItemInfoWebServiceHandler().execute(WebServiceConfig.address + "/item/" + itemId);
-    }
-
-    private class ItemInfoWebServiceHandler extends AsyncTask<String, Void, String>{
-
-        private ProgressDialog dialog = new ProgressDialog(ItemInbound.this);
-
-        @Override
-        protected void onPreExecute() {
-            dialog.setMessage("Connecting with server...");
-            dialog.show();
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setCancelable(false);
-        }
-
-        @Override
-        protected String doInBackground(String... urls) {
-            try {
-                URL url = new URL(urls[0]);
-                URLConnection connection = url.openConnection();
-                connection.setReadTimeout(10000);
-                connection.setConnectTimeout(10000);
-                InputStream in = new BufferedInputStream(connection.getInputStream());
-
-                return convertInputStreamToString(in);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-
-            dialog.dismiss();
-            try {
-                JSONObject object = new JSONObject(result);
-                ItemInboundInfo itemInboundInfo = new ItemInboundInfo();
-                itemInboundInfo.setId(object.optLong("id"));
-                itemInboundInfo.setName(object.optString("name"));
-                itemInboundInfo.setLocationId(object.optLong("locationId"));
-                itemInboundInfo.setDescription(object.optString("description"));
-                itemInboundInfo.setLocationName(object.optString("locationName"));
-                itemInboundInfo.setQuantity(object.optInt("quantity"));
-                updateGUI(itemInboundInfo.getId() + "  Name: " + itemInboundInfo.getName(),
-                            itemInboundInfo.getId() + "  Location: " + itemInboundInfo.getLocationName(),
-                            itemQty + "");
-            } catch (Exception e) {
-                new AlertDialog.Builder(ItemInbound.this)
-                        .setTitle("Error")
-                        .setMessage("Check Internet connection")
-                        .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                callItemInfoWebService();
-                            }
-                        }).setCancelable(false).setNegativeButton("Back", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                }).show();
-            }
-        }
-    }
-
-    private void updateGUI(String itemInfo, String fromInfo, String qtyInfo) {
-        itemIdTxt.setText("Item: " + itemInfo);
-        fromTxt.setText("From: " + fromInfo);
-        itemQtyTxt.setText("Qty: " + qtyInfo);
-    }
-
     private void connectCommitButtonLogic(){
-        commitInboundButton.setOnClickListener(new View.OnClickListener() {
+        commitCycleCountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callItemInboundWebService();
+                callCycleCountWebService();
             }
         });
     }
 
-    private void callItemInboundWebService(){
-        new ItemInboundWebServiceHandler().execute(WebServiceConfig.address + "/additem/" + itemId +"/" + itemQty + "/" + currentLocation);
+    private void callCycleCountWebService(){
+        new CycleCountWebServiceHandler().execute(WebServiceConfig.address + "/item/" + itemId +"/" + totalScannedQty + "/" + currentLocation);
     }
 
-    private class ItemInboundWebServiceHandler extends AsyncTask<String, Void, String>{
+    private class CycleCountWebServiceHandler extends AsyncTask<String, Void, String>{
 
-        private ProgressDialog dialog = new ProgressDialog(ItemInbound.this);
+        private ProgressDialog dialog = new ProgressDialog(CycleCountActivity.this);
 
         @Override
         protected void onPreExecute() {
@@ -305,9 +337,9 @@ public class ItemInbound extends AppCompatActivity {
             dialog.dismiss();
             try {
                 if(result.contains("true")){
-                    new AlertDialog.Builder(ItemInbound.this)
+                    new AlertDialog.Builder(CycleCountActivity.this)
                             .setTitle("Processed")
-                            .setMessage("Package successfully processed")
+                            .setMessage("Correct qty")
                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     clearScreen();
@@ -318,12 +350,12 @@ public class ItemInbound extends AppCompatActivity {
                         }
                     }).show();
                 } else {
-                    new AlertDialog.Builder(ItemInbound.this)
+                    new AlertDialog.Builder(CycleCountActivity.this)
                             .setTitle("Error")
-                            .setMessage("Server didn't processed this request, check data and try again!")
+                            .setMessage("Qty different than system state, count again or contact supervisor!")
                             .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    callItemInboundWebService();
+                                    clearScreen();
                                 }
                             }).setCancelable(false).setNegativeButton("Back", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -332,12 +364,12 @@ public class ItemInbound extends AppCompatActivity {
                     }).show();
                 }
             } catch (Exception e) {
-                new AlertDialog.Builder(ItemInbound.this)
+                new AlertDialog.Builder(CycleCountActivity.this)
                         .setTitle("Error")
                         .setMessage("Check Internet connection")
                         .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                callItemInboundWebService();
+                                callCycleCountWebService();
                             }
                         }).setCancelable(false).setNegativeButton("Back", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -350,12 +382,13 @@ public class ItemInbound extends AppCompatActivity {
 
     private void clearScreen(){
         itemIdTxt.setText("");
-        fromTxt.setText("");
+        itemQtyTotalScanned.setText("");
         itemQtyTxt.setText("");
         itemId = -1;
-        locationId = -1;
-        itemQty = -1;
-        commitInboundButton.setEnabled(false);
+        totalScannedQty = 0;
+        lastScannedQty = 0;
+        firstScan = true;
+        commitCycleCountButton.setEnabled(false);
     }
 
     public static String convertInputStreamToString(InputStream is) {

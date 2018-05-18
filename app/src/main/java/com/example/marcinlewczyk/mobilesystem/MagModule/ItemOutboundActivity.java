@@ -1,11 +1,10 @@
-package com.example.marcinlewczyk.mobilesystem;
+package com.example.marcinlewczyk.mobilesystem.MagModule;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -21,6 +20,7 @@ import android.widget.TextView;
 
 import com.example.marcinlewczyk.mobilesystem.Config.WebServiceConfig;
 import com.example.marcinlewczyk.mobilesystem.POJO.ItemInboundInfo;
+import com.example.marcinlewczyk.mobilesystem.R;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -36,31 +36,24 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class CycleCount extends AppCompatActivity {
+public class ItemOutboundActivity extends AppCompatActivity {
     private String currentLocation;
     private SurfaceView cameraPreview;
-    private TextView itemIdTxt, itemQtyTxt, itemQtyTotalScanned;
-    private Button commitCycleCountButton, readCodeCycleCountButton;
+    private TextView itemIdTxt, whereToTxt, itemQtyTxt;
+    private Button commitOutboundButton, readCodeOutboundButton;
     private BarcodeDetector barcodeDetector;
     private CameraSource cameraSource;
-    private long lastScan, timeParameter = 2000, itemId, lastItemId;
     private final int RequestCameraPermissionID = 1001;
-    private int lastScannedQty, totalScannedQty;
-    private boolean firstScan;
+    private long itemId, locationId;
+    private int itemQty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cycle_count);
-        initVariables();
+        setContentView(R.layout.activity_item_outbound);
         prepareGUI();
         buildQRScanner();
         connectCommitButtonLogic();
-    }
-
-    private void initVariables() {
-        totalScannedQty = 0;
-        firstScan = true;
     }
 
     private void prepareGUI() {
@@ -71,16 +64,16 @@ public class CycleCount extends AppCompatActivity {
     private void initControls() {
         cameraPreview = findViewById(R.id.cameraPreview);
         itemIdTxt = findViewById(R.id.itemId);
+        whereToTxt = findViewById(R.id.whereTo);
         itemQtyTxt = findViewById(R.id.itemQty);
-        itemQtyTotalScanned = findViewById(R.id.itemQtyTotal);
-        commitCycleCountButton = findViewById(R.id.commitButton);
-        readCodeCycleCountButton = findViewById(R.id.readCodeButton);
-        commitCycleCountButton.setEnabled(false);
+        commitOutboundButton = findViewById(R.id.commitButton);
+        readCodeOutboundButton = findViewById(R.id.readCodeButton);
+        commitOutboundButton.setEnabled(false);
     }
 
     private void setTitleBarContent(){
         getCurrentLocation();
-        setTitle("Cycle count - your location: " + currentLocation);
+        setTitle("Item outbound - your location: " + currentLocation);
     }
 
     private void getCurrentLocation(){
@@ -119,7 +112,7 @@ public class CycleCount extends AppCompatActivity {
             public void surfaceCreated(SurfaceHolder holder) {
 
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(CycleCount.this, new String[]{android.Manifest.permission.CAMERA}, RequestCameraPermissionID);
+                    ActivityCompat.requestPermissions(ItemOutboundActivity.this, new String[]{android.Manifest.permission.CAMERA}, RequestCameraPermissionID);
                     return;
                 }
                 try {
@@ -142,7 +135,7 @@ public class CycleCount extends AppCompatActivity {
     }
 
     private void bindReadButtonWithScanning() {
-        readCodeCycleCountButton.setOnClickListener(new View.OnClickListener() {
+        readCodeOutboundButton.setOnClickListener(new View.OnClickListener() {
             int howMuchScannedData = 0;
             @Override
             public void onClick(View v) {
@@ -159,38 +152,17 @@ public class CycleCount extends AppCompatActivity {
                         if(qrCodes.size() != 0){
                             String qrCodeString = qrCodes.valueAt(0).displayValue;
                             String[] results = qrCodeString.split(";");
-                            long currentTime = SystemClock.uptimeMillis();
-                            if(currentTime - lastScan >= timeParameter){
-                                itemId = Long.valueOf(results[0]);
-                                lastScannedQty = Integer.valueOf(results[2]);
-                                howMuchScannedData = results.length;
-                                lastScan = currentTime;
-                            }
+                            itemId = Long.valueOf(results[0]);
+                            locationId = Long.valueOf(results[1]);
+                            itemQty = Integer.valueOf(results[2]);
+                            howMuchScannedData = results.length;
                         }
                     }
                 });
-                if(howMuchScannedData == 3){
-                    if(firstScan){
-                        totalScannedQty += lastScannedQty;
-                        updateGUI("" + itemId, "" + lastScannedQty, "" + totalScannedQty);
-                        callItemInfoWebService();
-                        commitCycleCountButton.setEnabled(true);
-                        lastItemId = itemId;
-                        firstScan = false;
-                    } else if (lastItemId == itemId) {
-                        totalScannedQty += lastScannedQty;
-                        updateGUI("", "" + lastScannedQty, "" + totalScannedQty);
-                    } else {
-                        new AlertDialog.Builder(CycleCount.this)
-                                .setTitle("Error")
-                                .setMessage("This item is different than previous one, cannot count different items at once")
-                                .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                    }
-                                }).setCancelable(false)
-                                .show();
-                    }
+                if(howMuchScannedData == 3){ //change if needed
+                    updateGUI("" + itemId, "" + locationId, "" + itemQty);
+                    callItemInfoWebService();
+                    commitOutboundButton.setEnabled(true);
                 }
             }
         });
@@ -202,7 +174,7 @@ public class CycleCount extends AppCompatActivity {
 
     private class ItemInfoWebServiceHandler extends AsyncTask<String, Void, String> {
 
-        private ProgressDialog dialog = new ProgressDialog(CycleCount.this);
+        private ProgressDialog dialog = new ProgressDialog(ItemOutboundActivity.this);
 
         @Override
         protected void onPreExecute() {
@@ -220,6 +192,7 @@ public class CycleCount extends AppCompatActivity {
                 connection.setReadTimeout(10000);
                 connection.setConnectTimeout(10000);
                 InputStream in = new BufferedInputStream(connection.getInputStream());
+
                 return convertInputStreamToString(in);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -241,10 +214,10 @@ public class CycleCount extends AppCompatActivity {
                 itemInboundInfo.setLocationName(object.optString("locationName"));
                 itemInboundInfo.setQuantity(object.optInt("quantity"));
                 updateGUI(itemInboundInfo.getId() + "  Name: " + itemInboundInfo.getName(),
-                        lastScannedQty + "",
-                        totalScannedQty + "");
+                        itemInboundInfo.getId() + "  Location: " + itemInboundInfo.getLocationName(),
+                        itemQty + "");
             } catch (Exception e) {
-                new AlertDialog.Builder(CycleCount.this)
+                new AlertDialog.Builder(ItemOutboundActivity.this)
                         .setTitle("Error")
                         .setMessage("Check Internet connection")
                         .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
@@ -260,12 +233,10 @@ public class CycleCount extends AppCompatActivity {
         }
     }
 
-    private void updateGUI(String itemInfo, String scannedQty, String totalScannedQty) {
-        if(itemInfo != ""){
-            itemIdTxt.setText("Item: " + itemInfo);
-        }
-        itemQtyTotalScanned.setText("Last scanned qty: " + scannedQty);
-        itemQtyTxt.setText("Total scanned: " + totalScannedQty);
+    private void updateGUI(String itemInfo, String fromInfo, String qtyInfo) {
+        itemIdTxt.setText("Item: " + itemInfo);
+        whereToTxt.setText("To: " + fromInfo);
+        itemQtyTxt.setText("Qty: " + qtyInfo);
     }
 
     @Override
@@ -289,21 +260,21 @@ public class CycleCount extends AppCompatActivity {
     }
 
     private void connectCommitButtonLogic(){
-        commitCycleCountButton.setOnClickListener(new View.OnClickListener() {
+        commitOutboundButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callCycleCountWebService();
+                callItemOutboundWebService();
             }
         });
     }
 
-    private void callCycleCountWebService(){
-        new CycleCountWebServiceHandler().execute(WebServiceConfig.address + "/item/" + itemId +"/" + totalScannedQty + "/" + currentLocation);
+    private void callItemOutboundWebService(){
+        new ItemOutboundWebServiceHandler().execute(WebServiceConfig.address + "/removeitem/" + itemId +"/" + itemQty + "/" + currentLocation);
     }
 
-    private class CycleCountWebServiceHandler extends AsyncTask<String, Void, String>{
+    private class ItemOutboundWebServiceHandler extends AsyncTask<String, Void, String>{
 
-        private ProgressDialog dialog = new ProgressDialog(CycleCount.this);
+        private ProgressDialog dialog = new ProgressDialog(ItemOutboundActivity.this);
 
         @Override
         protected void onPreExecute() {
@@ -336,9 +307,9 @@ public class CycleCount extends AppCompatActivity {
             dialog.dismiss();
             try {
                 if(result.contains("true")){
-                    new AlertDialog.Builder(CycleCount.this)
+                    new AlertDialog.Builder(ItemOutboundActivity.this)
                             .setTitle("Processed")
-                            .setMessage("Correct qty")
+                            .setMessage("Package successfully processed")
                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     clearScreen();
@@ -349,12 +320,12 @@ public class CycleCount extends AppCompatActivity {
                         }
                     }).show();
                 } else {
-                    new AlertDialog.Builder(CycleCount.this)
+                    new AlertDialog.Builder(ItemOutboundActivity.this)
                             .setTitle("Error")
-                            .setMessage("Qty different than system state, count again or contact supervisor!")
+                            .setMessage("Server didn't processed this request, check data and try again!")
                             .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    clearScreen();
+                                    callItemOutboundWebService();
                                 }
                             }).setCancelable(false).setNegativeButton("Back", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -363,12 +334,12 @@ public class CycleCount extends AppCompatActivity {
                     }).show();
                 }
             } catch (Exception e) {
-                new AlertDialog.Builder(CycleCount.this)
+                new AlertDialog.Builder(ItemOutboundActivity.this)
                         .setTitle("Error")
                         .setMessage("Check Internet connection")
                         .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                callCycleCountWebService();
+                                callItemOutboundWebService();
                             }
                         }).setCancelable(false).setNegativeButton("Back", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -381,13 +352,12 @@ public class CycleCount extends AppCompatActivity {
 
     private void clearScreen(){
         itemIdTxt.setText("");
-        itemQtyTotalScanned.setText("");
+        whereToTxt.setText("");
         itemQtyTxt.setText("");
         itemId = -1;
-        totalScannedQty = 0;
-        lastScannedQty = 0;
-        firstScan = true;
-        commitCycleCountButton.setEnabled(false);
+        locationId = -1;
+        itemQty = -1;
+        commitOutboundButton.setEnabled(false);
     }
 
     public static String convertInputStreamToString(InputStream is) {

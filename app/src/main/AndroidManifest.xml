@@ -13,27 +13,27 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light">
-        <activity android:name=".MainMenu">
+        <activity android:name=".WarehouseSubMenuActivity" />
+
+        <meta-data
+            android:name="com.google.android.gms.vision.DEPENDENCIES"
+            android:value="barcode" />
+
+        <activity android:name=".MagModule.ItemInboundActivity" />
+        <activity android:name=".MagModule.ItemOutboundActivity" />
+        <activity android:name=".MagModule.CycleCountActivity" />
+        <activity android:name=".DeliverySubMenuActivity" />
+        <activity android:name=".MainMenuActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <meta-data
-            android:name="com.google.android.gms.vision.DEPENDENCIES"
-            android:value="barcode" />
-
-        <activity android:name=".ItemInbound" >
-
-        </activity>
-        <activity android:name=".ItemOutbound" >
-
-        </activity>
-        <activity android:name=".CycleCount">
-
-        </activity>
+        <activity android:name=".DeliveryModule.OrderInfoActivity" />
+        <activity android:name=".DeliveryModule.ShipPackageActivity" />
+        <activity android:name=".DeliveryModule.DeliverPackageActivity" />
+        <activity android:name=".DeliveryModule.OrderProductsInfoActivity"></activity>
     </application>
 
 </manifest>

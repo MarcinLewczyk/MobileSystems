@@ -1,7 +1,6 @@
 package com.example.marcinlewczyk.mobilesystem;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,17 +10,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class MainMenu extends Activity {
-    EditText currentLocation;
-    Button inboundActivity, outboundActivity, cycleCountActivity, setLocation;
+import com.example.marcinlewczyk.mobilesystem.MagModule.CycleCountActivity;
+import com.example.marcinlewczyk.mobilesystem.MagModule.ItemInboundActivity;
+import com.example.marcinlewczyk.mobilesystem.MagModule.ItemOutboundActivity;
+
+public class WarehouseSubMenuActivity extends Activity {
+    private EditText currentLocation;
+    private Button inboundActivity, outboundActivity, cycleCountActivity, setLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_menu);
+        setContentView(R.layout.activity_warehouse_sub_menu);
         bindControls();
         setListeners();
         getLocation();
+        setTitle("Warehouse module");
     }
 
     private void bindControls() {
@@ -40,7 +44,7 @@ public class MainMenu extends Activity {
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("location", currentLocation.getText().toString());
                 editor.apply();
-                Toast.makeText(MainMenu.this, "Location set!",
+                Toast.makeText(WarehouseSubMenuActivity.this, "Location set!",
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -48,7 +52,7 @@ public class MainMenu extends Activity {
         inboundActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ItemInbound.class);
+                Intent intent = new Intent(getApplicationContext(), ItemInboundActivity.class);
                 startActivity(intent);
             }
         });
@@ -56,7 +60,7 @@ public class MainMenu extends Activity {
         outboundActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ItemOutbound.class);
+                Intent intent = new Intent(getApplicationContext(), ItemOutboundActivity.class);
                 startActivity(intent);
             }
         });
@@ -64,7 +68,7 @@ public class MainMenu extends Activity {
         cycleCountActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), CycleCount.class);
+                Intent intent = new Intent(getApplicationContext(), CycleCountActivity.class);
                 startActivity(intent);
             }
         });

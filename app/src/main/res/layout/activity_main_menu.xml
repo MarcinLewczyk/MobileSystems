@@ -3,52 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainMenu">
-
-    <EditText
-        android:id="@+id/locationEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:layout_centerHorizontal="true"
-        android:hint="@string/location_edit_text"/>
+    tools:context=".MainMenuActivity">
 
     <Button
-        android:id="@+id/setLocationButton"
+        android:id="@+id/warehouseModuleNavigationButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/locationEditText"
+        android:layout_above="@id/deliveryModuleNavigationButton"
         android:textSize="20dp"
-        android:text="Set location"/>
+        android:text="Warehouse"/>
 
     <Button
-        android:id="@+id/inboundAct"
+        android:id="@+id/deliveryModuleNavigationButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/setLocationButton"
+        android:layout_centerInParent="true"
         android:layout_marginTop="20dp"
-        android:text="Item Inbound"
-        android:textSize="20dp"
-        />
-
-    <Button
-        android:id="@+id/outboundAct"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/inboundAct"
-        android:text="Item outbound"
-        android:textSize="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/cycleCountAct"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/outboundAct"
-        android:text="Cycle count"
-        android:textSize="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:text="Delivery"
+        android:textSize="20dp" />
 
 </RelativeLayout>

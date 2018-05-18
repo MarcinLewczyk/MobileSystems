@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MagModule.ItemInboundActivity">
+    tools:context=".DeliveryModule.OrderInfoActivity">
 
     <SurfaceView
         android:id="@+id/cameraPreview"
@@ -12,23 +12,23 @@
         android:layout_height="480px" />
 
     <TextView
-        android:id="@+id/itemIdAndFrom"
+        android:id="@+id/clientName"
         android:layout_marginTop="10dp"
         android:textSize="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
-        android:id="@+id/manufacturer"
-        android:layout_below="@id/itemIdAndFrom"
+        android:id="@+id/clientAddress1"
+        android:layout_below="@id/clientName"
         android:layout_marginTop="10dp"
         android:textSize="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
-        android:id="@+id/itemQty"
-        android:layout_below="@+id/manufacturer"
+        android:id="@+id/clientAddress2"
+        android:layout_below="@+id/clientAddress1"
         android:layout_above="@id/cameraPreview"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
@@ -44,19 +44,10 @@
         android:text="@string/capture_code"
         android:textSize="20dp"/>
 
-    <Button
-        android:id="@+id/commitButton"
-        android:layout_below="@id/readCodeButton"
-        android:layout_marginTop="15dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/commit_transaction"
-        android:textSize="20dp"/>
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/commitButton"
+        android:layout_below="@id/readCodeButton"
         android:gravity="center_horizontal"
         android:textSize="15dp"
         android:text="@string/camera_focus_text"/>

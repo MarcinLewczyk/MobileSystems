@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DeliverySubMenuActivity">
+
+    <Button
+        android:id="@+id/orderInfoActivityNavigationButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/shipPackageActivityNavigationButton"
+        android:textSize="20dp"
+        android:text="Check order details"/>
+
+    <Button
+        android:id="@+id/shipPackageActivityNavigationButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/deliverPackageActivityNavigationButton"
+        android:layout_marginTop="20dp"
+        android:text="Ship package"
+        android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/deliverPackageActivityNavigationButton"
+        android:layout_centerHorizontal="true"
+        android:text="Delivery"
+        android:textSize="20dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/orderProductsActivityNavigationButton"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/deliverPackageActivityNavigationButton"
+        android:text="Check order's ingredients"
+        android:textSize="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
