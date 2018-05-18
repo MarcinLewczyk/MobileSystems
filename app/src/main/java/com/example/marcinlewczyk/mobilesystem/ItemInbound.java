@@ -72,7 +72,7 @@ public class ItemInbound extends AppCompatActivity {
 
     private void setTitleBarContent(){
         getCurrentLocation();
-        setTitle("Your location: " + currentLocation);
+        setTitle("Item Inbound - your location: " + currentLocation);
     }
 
     private void getCurrentLocation(){
@@ -164,7 +164,6 @@ public class ItemInbound extends AppCompatActivity {
                 }
             }
         });
-
     }
 
     @Override
@@ -218,6 +217,7 @@ public class ItemInbound extends AppCompatActivity {
                 return null;
             }
         }
+
         @Override
         protected void onPostExecute(String result) {
 
@@ -298,12 +298,13 @@ public class ItemInbound extends AppCompatActivity {
                 return null;
             }
         }
+
         @Override
         protected void onPostExecute(String result) {
 
             dialog.dismiss();
             try {
-                if(result == "true"){
+                if(result.contains("true")){
                     new AlertDialog.Builder(ItemInbound.this)
                             .setTitle("Processed")
                             .setMessage("Package successfully processed")
