@@ -5,5 +5,59 @@
     android:layout_height="match_parent"
     tools:context=".DeliveryModule.OrderProductsInfoActivity">
 
+    <SurfaceView
+        android:id="@+id/cameraPreview"
+        android:layout_alignParentStart="true"
+        android:layout_width="match_parent"
+        android:layout_height="480px" />
+
+    <Button
+        android:id="@+id/readCodeButton"
+        android:layout_below="@id/cameraPreview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/capture_code"
+        android:textSize="20dp"/>
+
+    <TextView
+        android:id="@+id/focusTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/readCodeButton"
+        android:gravity="center_horizontal"
+        android:textSize="15dp"
+        android:text="@string/camera_focus_text"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/orderProductsLinearLayout"
+        android:layout_below="@id/focusTextView"
+        android:weightSum="1">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:textSize="17sp"
+            android:layout_marginLeft="15dp"
+            android:text="Dish"
+            android:layout_weight="0.5" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center_vertical"
+            android:textSize="17sp"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="0.5"
+            android:text="Quantity"/>
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/orderProductsListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/orderProductsLinearLayout">
+    </ListView>
 
 </RelativeLayout>
