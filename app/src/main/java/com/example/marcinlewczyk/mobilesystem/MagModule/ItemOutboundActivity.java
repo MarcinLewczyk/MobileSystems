@@ -73,7 +73,7 @@ public class ItemOutboundActivity extends AppCompatActivity {
 
     private void setTitleBarContent(){
         getCurrentLocation();
-        setTitle("Item outbound - your location: " + currentLocation);
+        setTitle("Item release - your location: " + currentLocation);
     }
 
     private void getCurrentLocation(){

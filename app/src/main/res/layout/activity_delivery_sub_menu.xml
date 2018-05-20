@@ -38,7 +38,7 @@
         android:id="@+id/orderProductsActivityNavigationButton"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/deliverPackageActivityNavigationButton"
-        android:text="Check order's ingredients"
+        android:text="Check order's items"
         android:textSize="20dp"
         android:layout_marginTop="20dp"
         android:layout_width="match_parent"

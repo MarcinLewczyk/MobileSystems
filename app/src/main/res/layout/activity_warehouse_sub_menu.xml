@@ -29,14 +29,14 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@id/setLocationButton"
         android:layout_marginTop="20dp"
-        android:text="Item Inbound"
+        android:text="Item Receipt"
         android:textSize="20dp" />
 
     <Button
         android:id="@+id/outboundAct"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/inboundAct"
-        android:text="Item outbound"
+        android:text="Item Release"
         android:textSize="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
